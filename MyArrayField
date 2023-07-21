@@ -2073,16 +2073,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 			end
 			
 			Refresh()
-			
-			Dropdown.Icon.Visible = false
-			if DropdownSettings.Icon then 
-				if not string.match(DropdownSettings.Icon, "rbxassetid://") then
-					DropdownSettings.Icon = "rbxassetid://" .. tostring(DropdownSettings.Icon)
-				end
-				Dropdown.Icon.Image = tostring(DropdownSettings.Icon)
-				Dropdown.Icon.Visible = true
-				Dropdown.Title.Position = UDim2.new(0, 50, 0, 22)
-			end
 
 			Dropdown.BackgroundTransparency = 1
 			Dropdown.UIStroke.Transparency = 1
@@ -2379,16 +2369,6 @@ function RayfieldLibrary:CreateWindow(Settings)
 				Dropdown.Parent = DropdownSettings.SectionParent.Holder
 			else
 				Dropdown.Parent = TabPage
-			end
-
-			Dropdown.Icon.Visible = false
-			if DropdownSettings.Icon then 
-				if not string.match(DropdownSettings.Icon, "rbxassetid://") then
-					DropdownSettings.Icon = "rbxassetid://" .. tostring(DropdownSettings.Icon)
-				end
-				Dropdown.Icon.Image = tostring(DropdownSettings.Icon)
-				Dropdown.Icon.Visible = true
-				Dropdown.Title.Position = UDim2.new(0, 50, 0, 22)
 			end
 
 			Dropdown.List.Visible = false
