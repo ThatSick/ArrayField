@@ -3808,14 +3808,6 @@ Topbar.ChangeSize.MouseButton1Click:Connect(function()
 		Minimise()
 	end
 end)
-Topbar.Search.MouseButton1Click:Connect(function()
-	if Debounce or Minimised then return end
-	if SearchHided then
-		SearchHided = false
-	else
-		SearchHided = true
-	end
-end)
 Topbar.Type.MouseButton1Click:Connect(function()
 	if Debounce or Minimised then return end
 	if SideBarClosed then
