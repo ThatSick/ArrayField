@@ -3845,14 +3845,14 @@ function RayfieldLibrary:ToggleOldTabStyle(oldTabStyle)
 		Elements.Size = UDim2.new(1, 0, 0, 364)
 		Elements.Position = UDim2.new(0.5, 0, 0.5, 45)
 		
-		Topbar.Type.Visible = false
+		--Topbar.Type.Visible = false
 		Topbar.Title.Position = UDim2.new(0, 15, 0.5, 0)
 	else
 		TopList.Visible = false
 		Elements.Size = UDim2.new(1, 0,0, 409)
 		Elements.Position = UDim2.new(0.5, 0, 0.555, 0)
 		
-		Topbar.Type.Visible = true
+		--Topbar.Type.Visible = true
 		Topbar.Title.Position = UDim2.new(0, 45, 0.5, 0)
 	end
 end
