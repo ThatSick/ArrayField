@@ -1,4 +1,4 @@
-"--[[
+--[[
 
 ArrayField Interface Suite
 by Arrays
@@ -3955,4 +3955,4 @@ function RayfieldLibrary:LoadConfiguration()
 end
 task.delay(9, RayfieldLibrary.LoadConfiguration, RayfieldLibrary)
 
-return RayfieldLibrary"
+return RayfieldLibrary
