@@ -1,4 +1,4 @@
---[[
+"--[[
 
 ArrayField Interface Suite
 by Arrays
@@ -159,7 +159,7 @@ local Topbar = Main.Topbar
 local Elements = Main.Elements
 local LoadingFrame = Main.LoadingFrame
 local TopList = Main.TabList
-local SideList = Main.SideTabList.Holder
+local SideList = Main.TabList
 local TabsList = TopList and SideList
 local SearchBar = Main.Searchbar
 local Filler = SearchBar.CanvasGroup.Filler
@@ -3955,4 +3955,4 @@ function RayfieldLibrary:LoadConfiguration()
 end
 task.delay(9, RayfieldLibrary.LoadConfiguration, RayfieldLibrary)
 
-return RayfieldLibrary
+return RayfieldLibrary"
