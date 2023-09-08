@@ -156,6 +156,11 @@ ParentObject(Rayfield)
 local Camera = workspace.CurrentCamera
 local Main = Rayfield.Main
 local Topbar = Main.Topbar
+local TabListBack = Main.TabListBack
+TabListBack.BackgroundTransparency = 1
+TabListBack.Title.TextTransparency = 1
+TabListBack.BackgroundTransparency = 1
+TabListBack.Divider.Size = UDim2.new(0, 1, 0, 0)
 local Elements = Main.Elements
 local LoadingFrame = Main.LoadingFrame
 local TopList = Main.TabList
@@ -3747,6 +3752,7 @@ end
 
 	Topbar.BackgroundTransparency = 1
 	Topbar.Divider.Size = UDim2.new(0, 0, 0, 1)
+	TabListBack.Divider.Size = UDim2.new(0, 1, 0, 0)
 	Topbar.CornerRepair.BackgroundTransparency = 1
 	Topbar.Title.TextTransparency = 1
 	Topbar.Theme.ImageTransparency = 1
@@ -3845,14 +3851,14 @@ function RayfieldLibrary:ToggleOldTabStyle(oldTabStyle)
 		Elements.Size = UDim2.new(1, 0, 0, 364)
 		Elements.Position = UDim2.new(0.5, 0, 0.5, 45)
 		
-		Topbar.Type.Visible = false
+		--Topbar.Type.Visible = false
 		Topbar.Title.Position = UDim2.new(0, 15, 0.5, 0)
 	else
 		TopList.Visible = false
 		Elements.Size = UDim2.new(1, 0,0, 409)
 		Elements.Position = UDim2.new(0.5, 0, 0.555, 0)
 		
-		Topbar.Type.Visible = true
+		--Topbar.Type.Visible = true
 		Topbar.Title.Position = UDim2.new(0, 45, 0.5, 0)
 	end
 end
@@ -3880,16 +3886,6 @@ Topbar.Search.MouseButton1Click:Connect(function()
 	else
 		SearchHided = true
 		CloseSearch()
-	end
-end)
-Topbar.Type.MouseButton1Click:Connect(function()
-	if Debounce or Minimised then return end
-	if SideBarClosed then
-		Topbar.Type.Image = "rbxassetid://"..6023565894
-		OpenSideBar()
-	else
-		Topbar.Type.Image = "rbxassetid://"..6023565896
-		CloseSideBar()
 	end
 end)
 Topbar.Hide.MouseButton1Click:Connect(function()
