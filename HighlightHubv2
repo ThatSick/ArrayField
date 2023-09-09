@@ -1376,7 +1376,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 -- 		})
 -- 	end)
 	TopList.Template.Visible = false
-	SideList.SideTemplate.Visible = false
+	--SideList.SideTemplate.Visible = false
 	Notifications.Template.Visible = false
 	Notifications.Visible = true
 	wait(0.5)
@@ -1402,7 +1402,7 @@ function RayfieldLibrary:CreateWindow(Settings)
 		Window.Tabs[Name]={Elements = {}}
 		local Tab = Window.Tabs[Name]
 		local SDone = false
-		local TopTabButton,SideTabButton = TopList.Template:Clone(), SideList.SideTemplate:Clone()
+		local TopTabButton = TopList.Template:Clone()
 
 		SideTabButton.Parent = SideList
 		TopTabButton.Parent = TopList
