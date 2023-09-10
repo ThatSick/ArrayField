@@ -117,7 +117,7 @@ local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = game:GetService('Players').LocalPlayer
 local TextService = game:GetService("TextService") 
 -- Interface Management
-local Rayfield = game:GetObjects("rbxassetid://14733595083")[1]
+local Rayfield = game:GetObjects("rbxassetid://14739548099")[1]
 
 Rayfield.Enabled = false
 -- Tasks
