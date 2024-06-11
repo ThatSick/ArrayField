@@ -330,7 +330,7 @@ function HLKeySystem:Create(Options)
     )
     Object.Login.MouseButton1Click:Connect(
         function()
-            if Object.KeyBox.Text == "hlontop" then
+            if Object.KeyBox.Text == "hlvipcomingsoon" then
               Callback()
               RemoveUI()
               Fluent:Destroy()
