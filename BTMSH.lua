@@ -80,7 +80,7 @@ local InterfaceManager = {} do
 				ImageLabel.Name = "ImageLabel"
 				ImageLabel.BackgroundTransparency = 1
 				ImageLabel.Size = UDim2.new(1, 0, 1, 0)
-				ImageLabel.Image = "rbxassetid://17714975689"
+				ImageLabel.Image = "rbxassetid://18131839384"
 				ImageLabel.Parent = Button
 			
 				local UICorner = Instance.new("UICorner")
