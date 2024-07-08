@@ -204,7 +204,7 @@ local SaveManager = {} do
 
 		local section = tab:AddSection("Configuration")
 
-		section:AddInput("SaveManager_ConfigName",    { Title = "Config name" })
+		section:AddInput("SaveManager_ConfigName",    { Title = "Config Name" })
 
 		section:AddButton({
             Title = "Create config",
@@ -227,7 +227,7 @@ local SaveManager = {} do
 				end
 				self.Library:Notify({
 					Title = "Configuration",
-					Content = string.format("Created config %q", Value),
+					Content = string.format("Created config %q", name),
 					Duration = 5
 				})
                 SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
