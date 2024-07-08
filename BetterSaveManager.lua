@@ -204,37 +204,36 @@ local SaveManager = {} do
 
 		local section = tab:AddSection("Configuration")
 
-		section:AddInput("SaveManager_CreateConfigInput", {
-			Title = "Create Config",
-			Finished = true,
-			Callback = function(Value)
-                if Value:gsub(" ", "") == "" then 
+		section:AddInput("SaveManager_ConfigName",    { Title = "Config name" })
+
+		section:AddButton({
+            Title = "Create config",
+            Callback = function()
+                local name = SaveManager.Options.SaveManager_ConfigName.Value
+				if name:gsub(" ", "") == "" then 
                     return self.Library:Notify({
 						Title = "Configuration",
 						Content = "Invalid config name (empty)",
 						Duration = 5
 					})
                 end
-
-                local success, err = self:Save(Value)
-                if not success then
-                    return self.Library:Notify({
+				local success, err = self:Save(name)
+				if not success then
+					return self.Library:Notify({
 						Title = "Configuration",
 						Content = "Failed to save config: " .. err,
 						Duration = 5
 					})
-                end
-
+				end
 				self.Library:Notify({
 					Title = "Configuration",
 					Content = string.format("Created config %q", Value),
 					Duration = 5
 				})
-
                 SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
                 SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
-			end
-		})
+            end
+        })
 
 		section:AddDropdown("SaveManager_ConfigList", { Title = "Config List", Values = self:RefreshConfigList(), AllowNull = true })
 
