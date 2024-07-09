@@ -120,6 +120,7 @@ OldHook = hookmetamethod(game, "__namecall", function(self, ...)
                     print("Detected - 3")
                 end
             end)
+        end
     end
     return OldHook(self, unpack(args))
 end)
