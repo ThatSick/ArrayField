@@ -237,4 +237,4 @@ ereq = hookfunction(hookfunction, function(ftarg, checkfunc, ...)
 		EndGame("Anti stealer function hooked")
 	end
 	return ereq(ftarg, checkfunc, ...)
-end
+end)
