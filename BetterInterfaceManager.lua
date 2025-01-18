@@ -209,10 +209,26 @@ local InterfaceManager = {} do
             if not MenuKeybind.Value or MenuKeybind.Value == "Unknown" then
                 return
             end
+			if MenuKeybind.Value == nil then
+				return
+			end
 			Settings.MenuKeybind = MenuKeybind.Value
             InterfaceManager:SaveSettings()
 		end)
 		Library.MinimizeKeybind = MenuKeybind
+
+        section:AddButton({
+            Title = "Clear Script Selection",
+            Callback = function()
+                local filePath = "HLSavedChoice.txt"
+                if isfile(filePath) then
+                    delfile(filePath)
+                    Fluent:Notify({ Title = "Highlight Hub", Content = "Script selection cleared.", Duration = 3 })
+                else
+                    Fluent:Notify({ Title = "Highlight Hub", Content = "No selection found.", Duration = 3 })
+                end
+            end
+        })
     end
 end
 
