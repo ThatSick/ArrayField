@@ -223,24 +223,12 @@ local InterfaceManager = {} do
                 local filePath = "HLSavedChoice.txt"
                 if isfile(filePath) then
                     delfile(filePath)
-                    Library:Notify({ Title = "Success", Text = "File cleared successfully!" })
+                    Fluent:Notify({ Title = "Highlight Hub", Content = "Script selection cleared.", Duration = 3 })
                 else
-                    Library:Notify({ Title = "Error", Text = "File not found." })
+                    Fluent:Notify({ Title = "Highlight Hub", Content = "No selection found.", Duration = 3 })
                 end
             end
         })
-		section:AddButton({
-			Title = "Clear Script Selection",
-			Callback = function()
-                local filePath = "HLSavedChoice.txt"
-                if isfile(filePath) then
-                    delfile(filePath)
-					Fluent:Notify({ Title = "Highlight Hub", Content = "Script selection cleared.", Duration = 3 })
-                else
-      			    Fluent:Notify({ Title = "Highlight Hub", Content = "No selection found.", Duration = 3 })
-                end
-			end
-		})
     end
 end
 
