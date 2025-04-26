@@ -1,7 +1,7 @@
 local httpService = game:GetService("HttpService")
 
 local SaveManager = {} do
-	SaveManager.Folder = "HighlightHub"
+	SaveManager.Folder = "FluentSettings"
 	SaveManager.Ignore = {}
 	SaveManager.Parser = {
 		Toggle = {
@@ -145,19 +145,6 @@ local SaveManager = {} do
 		end
 	end
 
-	function SaveManager:CreateDefaultIfNeeded()
-		local defaultConfigPath = self.Folder .. "/settings/Default.json"
-		local autoloadPath = self.Folder .. "/settings/autoload.txt"
-	
-		if not isfile(defaultConfigPath) then
-			self:Save("Default")
-		end
-	
-		if not isfile(autoloadPath) then
-			writefile(autoloadPath, "Default")
-		end
-	end
-
 	function SaveManager:RefreshConfigList()
 		local list = listfiles(self.Folder .. "/settings")
 
@@ -176,7 +163,7 @@ local SaveManager = {} do
 
 				if char == "/" or char == "\\" then
 					local name = file:sub(pos + 1, start - 1)
-					if name ~= "UiSettings" then
+					if name ~= "options" then
 						table.insert(out, name)
 					end
 				end
@@ -351,7 +338,6 @@ local SaveManager = {} do
 	end
 
 	SaveManager:BuildFolderTree()
-	SaveManager:CreateDefaultIfNeeded()
 end
 
 return SaveManager
