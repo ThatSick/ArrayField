@@ -1,4 +1,3 @@
-print("Default")
 local httpService = game:GetService("HttpService")
 
 local SaveManager = {} do
@@ -76,6 +75,7 @@ local SaveManager = {} do
 
 	function SaveManager:SetFolder(folder)
 		self.Folder = folder;
+		print(self.Folder)
 		self:BuildFolderTree()
 	end
 
@@ -355,4 +355,5 @@ local SaveManager = {} do
 	SaveManager:BuildFolderTree()
 end
 
+print("BetterSaveManager Loaded")
 return SaveManager
