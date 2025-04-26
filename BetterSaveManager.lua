@@ -76,6 +76,7 @@ local SaveManager = {} do
 	function SaveManager:SetFolder(folder)
 		self.Folder = folder;
 		self:BuildFolderTree()
+		self:CreateDefaultIfNeeded()
 	end
 
 	function SaveManager:Save(name)
@@ -146,7 +147,6 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:CreateDefaultIfNeeded()
-		print(self.Folder)
 		local defaultConfigPath = self.Folder .. "/settings/Default.json"
 		local autoloadPath = self.Folder .. "/settings/autoload.txt"
 	
@@ -190,7 +190,6 @@ local SaveManager = {} do
 	function SaveManager:SetLibrary(library)
 		self.Library = library
 		self.Options = library.Options
-		self:CreateDefaultIfNeeded()
 	end
 
 	function SaveManager:LoadAutoloadConfig()
@@ -355,5 +354,5 @@ local SaveManager = {} do
 	SaveManager:BuildFolderTree()
 end
 
-print("BetterSaveManager Loaded 2.0")
+print("BetterSaveManager Loaded")
 return SaveManager
