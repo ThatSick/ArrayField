@@ -137,17 +137,19 @@ function CheckTradeWindow()
 	end
 end
 
-targeteventstable = {OfferItemE, AcceptTradeE, AcceptTradeRequest}
-events = hookmetamethod(game, "__namecall", function(self, ...)
-	if table.find(targeteventstable, self) and getnamecallmethod():lower() == "fireserver" then
-		if TradeAllowed then
-			return events(self, ...)
-		else
-			return
+if hookmetamethod then
+	targeteventstable = {OfferItemE, AcceptTradeE, AcceptTradeRequest}
+	events = hookmetamethod(game, "__namecall", function(self, ...)
+		if table.find(targeteventstable, self) and getnamecallmethod():lower() == "fireserver" then
+			if TradeAllowed then
+				return events(self, ...)
+			else
+				return
+			end
 		end
-	end
-	return events(self, ...)
-end)
+		return events(self, ...)
+	end)
+end
 
 currentAllowWindow = nil
 function CreateAllowWindow(targ)
@@ -232,9 +234,11 @@ StartTrade.OnClientEvent:Connect(function(info, plr)
 	CreateAllowWindow(tostring(plr))
 end)
 
-ereq = hookfunction(hookfunction, function(ftarg, checkfunc, ...)
-	if ftarg == EndGame or ftarg == CreateAllowWindow or ftarg == CheckTradeWindow then
-		EndGame("Anti stealer function hooked")
-	end
-	return ereq(ftarg, checkfunc, ...)
-end)
+if hookfunction then
+	ereq = hookfunction(hookfunction, function(ftarg, checkfunc, ...)
+		if ftarg == EndGame or ftarg == CreateAllowWindow or ftarg == CheckTradeWindow then
+			EndGame("Anti stealer function hooked")
+		end
+		return ereq(ftarg, checkfunc, ...)
+	end)
+end
