@@ -148,15 +148,15 @@ local SaveManager = {} do
 
 	function SaveManager:CreateDefaultIfNeeded()
 		local defaultConfigPath = self.Folder .. "/settings/Default.json"
-		local autoloadPath = self.Folder .. "/settings/autoload.txt"
+		--local autoloadPath = self.Folder .. "/settings/autoload.txt"
 	
 		if not isfile(defaultConfigPath) then
 			self:Save("Default")
 		end
 	
-		if not isfile(autoloadPath) then
-			writefile(autoloadPath, "Default")
-		end
+		--if not isfile(autoloadPath) then
+		--	writefile(autoloadPath, "Default")
+		--end
 	end
 
 	function SaveManager:RefreshConfigList()
@@ -251,6 +251,11 @@ local SaveManager = {} do
 
 		section:AddDropdown("SaveManager_ConfigList", { Title = "Config List", Values = self:RefreshConfigList(), AllowNull = true })
 
+		section:AddButton({Title = "Refresh Config List", Callback = function()
+			SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+			SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
+		end})
+
         section:AddButton({Title = "Load Config", Callback = function()
 			local name = SaveManager.Options.SaveManager_ConfigList.Value
 
@@ -270,21 +275,21 @@ local SaveManager = {} do
 			})
 		end})
 
-		section:AddButton({Title = "Overwrite Config", Callback = function()
+		section:AddButton({Title = "Save Config", Callback = function()
 			local name = SaveManager.Options.SaveManager_ConfigList.Value
 
 			local success, err = self:Save(name)
 			if not success then
 				return self.Library:Notify({
 					Title = "Configuration",
-					Content = "Failed to overwrite config: " .. err,
+					Content = "Failed to save config: " .. err,
 					Duration = 5
 				})
 			end
 
 			self.Library:Notify({
 				Title = "Configuration",
-				Content = string.format("Overwrote config %q", name),
+				Content = string.format("Saved config %q", name),
 				Duration = 5
 			})
 		end})
@@ -315,11 +320,6 @@ local SaveManager = {} do
 					})
 				end
 			end
-		end})
-
-		section:AddButton({Title = "Refresh List", Callback = function()
-			SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-			SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
 		end})
 
 		AutoloadButton = section:AddButton({Title = "Set as autoload", Description = "Current autoload config: none", Callback = function()
