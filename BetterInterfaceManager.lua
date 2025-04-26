@@ -29,7 +29,7 @@ local InterfaceManager = {} do
 		end
 
 		table.insert(paths, self.Folder)
-		table.insert(paths, self.Folder .. "/settings")
+		--table.insert(paths, self.Folder .. "/settings")
 
 		for i = 1, #paths do
 			local str = paths[i]
@@ -40,11 +40,11 @@ local InterfaceManager = {} do
 	end
 
     function InterfaceManager:SaveSettings()
-        writefile(self.Folder .. "/options.json", HttpService:JSONEncode(InterfaceManager.Settings))
+        writefile(self.Folder .. "/UiSettings.json", HttpService:JSONEncode(InterfaceManager.Settings))
     end
 
     function InterfaceManager:LoadSettings()
-        local path = self.Folder .. "/options.json"
+        local path = self.Folder .. "/UiSettings.json"
         if isfile(path) then
             local data = readfile(path)
             local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
@@ -232,4 +232,5 @@ local InterfaceManager = {} do
     end
 end
 
+print("BetterInterfaceManager Loaded")
 return InterfaceManager
