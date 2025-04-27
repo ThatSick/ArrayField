@@ -1,5 +1,5 @@
 --By KirkaTMrus
-repeat task.wait(5) until game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("MainGUI")
+repeat task.wait(.5) until game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TradeGUI_Phone") or game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TradeGUI")
 
 function SetConstants()
 	Player = game.Players.LocalPlayer
