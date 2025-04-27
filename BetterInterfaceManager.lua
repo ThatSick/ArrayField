@@ -44,20 +44,24 @@ local InterfaceManager = {} do
         writefile(self.Folder .. "/UiSettings.json", HttpService:JSONEncode(InterfaceManager.Settings))
     end
 
-    function InterfaceManager:LoadSettings()
+	function InterfaceManager:LoadSettings()
 		if not self.Folder then error("Folder not set!") end
-        local path = self.Folder .. "/UiSettings.json"
-        if isfile(path) then
-            local data = readfile(path)
-            local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
-
-            if success then
-                for i, v in next, decoded do
-                    InterfaceManager.Settings[i] = v
-                end
-            end
-        end
-    end
+		local path = self.Folder .. "/UiSettings.json"
+		if isfile(path) then
+			local data = readfile(path)
+			local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
+	
+			if success and type(decoded) == "table" then
+				for i, v in next, decoded do
+					if i ~= nil and v ~= nil then
+						InterfaceManager.Settings[i] = v
+					end
+				end
+			else
+				warn("[InterfaceManager] Failed to decode settings file, or file is invalid.")
+			end
+		end
+	end
 
     function InterfaceManager:BuildInterfaceSection(tab)
         assert(self.Library, "Must set InterfaceManager.Library")
@@ -131,6 +135,9 @@ local InterfaceManager = {} do
 				end)
 			
 				Button.MouseButton1Click:Connect(function()
+					if dragging then
+						return
+					end
 					Toggle = not Toggle
 					if Toggle then
 						print("Minimize")
@@ -149,32 +156,34 @@ local InterfaceManager = {} do
 
 		local section = tab:AddSection("Interface")
 
+		-- [1] Theme Selection
 		local InterfaceTheme = section:AddDropdown("InterfaceTheme", {
 			Title = "Theme",
 			Values = Library.Themes,
 			Default = Settings.Theme,
 			Callback = function(Value)
 				Library:SetTheme(Value)
-                Settings.Theme = Value
-                InterfaceManager:SaveSettings()
+				Settings.Theme = Value
+				InterfaceManager:SaveSettings()
 			end
 		})
-
-        InterfaceTheme:SetValue(Settings.Theme)
-	
+		
+		InterfaceTheme:SetValue(Settings.Theme)
+		
+		-- [2] Visual Appearance
 		if Library.UseAcrylic then
 			section:AddToggle("AcrylicToggle", {
 				Title = "Acrylic",
-				Description = "The blurred background requires graphic quality 8+",
+				Description = "Blurred background (requires graphic quality 8+)",
 				Default = Settings.Acrylic,
 				Callback = function(Value)
 					Library:ToggleAcrylic(Value)
-                    Settings.Acrylic = Value
-                    InterfaceManager:SaveSettings()
+					Settings.Acrylic = Value
+					InterfaceManager:SaveSettings()
 				end
 			})
 		end
-	
+		
 		section:AddToggle("TransparentToggle", {
 			Title = "Transparency",
 			Description = "Makes the interface transparent.",
@@ -182,59 +191,66 @@ local InterfaceManager = {} do
 			Callback = function(Value)
 				Library:ToggleTransparency(Value)
 				Settings.Transparency = Value
-                InterfaceManager:SaveSettings()
+				InterfaceManager:SaveSettings()
 			end
 		})
-
+		
+		-- [3] UI Behavior
 		section:AddToggle("ToggleUiButtonToggle", {
-			Title = "Toggle Ui Button",
+			Title = "Show UI Toggle Button",
+			Description = "Adds a small draggable button to minimize the UI.",
 			Default = Settings.ToggleUiButton,
 			Callback = function(Value)
 				Settings.ToggleUiButton = Value
 				ToggleUi(Settings.ToggleUiButton)
-                InterfaceManager:SaveSettings()
+				InterfaceManager:SaveSettings()
 			end
 		})
-
+		
 		section:AddToggle("AutoMinimizeToggle", {
-			Title = "Auto Minimize",
-			Description = "Minimize the ui after loading it.",
+			Title = "Auto Minimize on Load",
+			Description = "Minimize the UI automatically after loading.",
 			Default = Settings.AutoMinimize,
 			Callback = function(Value)
 				Settings.AutoMinimize = Value
-                InterfaceManager:SaveSettings()
+				InterfaceManager:SaveSettings()
 			end
 		})
-
+		
 		if Settings.AutoMinimize then
 			Library.Window:Minimize()
 		end
-	
-		local MenuKeybind = section:AddKeybind("MenuKeybind", { Title = "Minimize Bind", Default = Settings.MenuKeybind })
+		
+		-- [4] Keybinds
+		local MenuKeybind = section:AddKeybind("MenuKeybind", {
+			Title = "Minimize Keybind",
+			Default = Settings.MenuKeybind
+		})
+		
 		MenuKeybind:OnChanged(function()
-            if not MenuKeybind.Value or MenuKeybind.Value == "Unknown" then
-                return
-            end
-			if MenuKeybind.Value == nil then
+			if not MenuKeybind.Value or MenuKeybind.Value == "Unknown" then
 				return
 			end
 			Settings.MenuKeybind = MenuKeybind.Value
-            InterfaceManager:SaveSettings()
+			InterfaceManager:SaveSettings()
 		end)
+		
 		Library.MinimizeKeybind = MenuKeybind
-
-        section:AddButton({
-            Title = "Clear Script Selection",
-            Callback = function()
-                local filePath = "HLSavedChoice.txt"
-                if isfile(filePath) then
-                    delfile(filePath)
-                    Fluent:Notify({ Title = "Highlight Hub", Content = "Script selection cleared.", Duration = 3 })
-                else
-                    Fluent:Notify({ Title = "Highlight Hub", Content = "No selection found.", Duration = 3 })
-                end
-            end
-        })
+		
+		-- [5] Miscellaneous
+		section:AddButton({
+			Title = "Clear Script Selection",
+			Description = "Clears your previously saved script choice.",
+			Callback = function()
+				local filePath = "HLSavedChoice.txt"
+				if isfile(filePath) then
+					delfile(filePath)
+					Fluent:Notify({ Title = "Highlight Hub", Content = "Script selection cleared.", Duration = 3 })
+				else
+					Fluent:Notify({ Title = "Highlight Hub", Content = "No selection found.", Duration = 3 })
+				end
+			end
+		})		
     end
 end
 
