@@ -2,9 +2,9 @@ local httpService = game:GetService("HttpService")
 
 local SaveManager = {} do
 	SaveManager.Folder = "HighlightHub"
+	SaveManager.AutoSavePath = SaveManager.Folder .. "/settings/AutoSaveEnabled.txt"
 	SaveManager.Ignore = {}
 	SaveManager.AutoSaveEnabled = true
-	SaveManager.IsLoadingConfig = true
 	SaveManager.Parser = {
 		Toggle = {
 			Save = function(idx, object) 
@@ -109,7 +109,7 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:AutoSave()
-		if not SaveManager.AutoSaveEnabled or SaveManager.IsLoadingConfig then
+		if not SaveManager.AutoSaveEnabled then
 			return
 		end
 	
@@ -119,8 +119,6 @@ local SaveManager = {} do
 				local success, err = self:Save(name)
 				if not success then
 					warn("Auto-save failed: " .. tostring(err))
-				else
-					print("Auto-saved config:", name)
 				end
 			end
 		end
@@ -130,18 +128,19 @@ local SaveManager = {} do
 		if not name then
 			return false, "no config file is selected"
 		end
-	
-		SaveManager.IsLoadingConfig = true
+
+		local previousAutoSave = SaveManager.AutoSaveEnabled
+		SaveManager.AutoSaveEnabled = false
 	
 		local file = self.Folder .. "/settings/" .. name .. ".json"
 		if not isfile(file) then 
-			SaveManager.IsLoadingConfig = false
+			SaveManager.AutoSaveEnabled = previousAutoSave
 			return false, "invalid file"
 		end
 	
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
-		if not success then 
-			SaveManager.IsLoadingConfig = false
+		if not success then
+			SaveManager.AutoSaveEnabled = previousAutoSave
 			return false, "decode error"
 		end
 	
@@ -152,8 +151,8 @@ local SaveManager = {} do
 				end)
 			end
 		end
-	
-		SaveManager.IsLoadingConfig = false
+
+		SaveManager.AutoSaveEnabled = previousAutoSave
 		return true
 	end	
 
@@ -175,6 +174,12 @@ local SaveManager = {} do
 				makefolder(str)
 			end
 		end
+
+		if isfile(SaveManager.AutoSavePath) then
+			SaveManager.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
+		else
+			SaveManager.AutoSaveEnabled = false
+		end		
 	end
 
 	function SaveManager:CreateDefaultIfNeeded()
@@ -348,12 +353,14 @@ local SaveManager = {} do
 			Default = SaveManager.AutoSaveEnabled,
 			Callback = function(Value)
 				SaveManager.AutoSaveEnabled = Value
-				InterfaceManager:SaveSettings()
 				if Value then
+					writefile(SaveManager.AutoSavePath, "true")
 					SaveManager:AutoSave()
+				else
+					writefile(SaveManager.AutoSavePath, "false")
 				end
 			end
-		})
+		})			
 		
 		-- [5] Autoload Settings
 		local AutoloadButton
