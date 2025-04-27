@@ -3,7 +3,7 @@ local HttpService = game:GetService("HttpService")
 local InterfaceManager = {} do
 	InterfaceManager.Folder = "HighlightHub"
     InterfaceManager.Settings = {
-        Theme = "Darker",
+        Theme = "Amethyst",
         Acrylic = false,
         Transparency = true,
 		ToggleUiButton = true,
@@ -40,10 +40,12 @@ local InterfaceManager = {} do
 	end
 
     function InterfaceManager:SaveSettings()
+		if not self.Folder then error("Folder not set.") end
         writefile(self.Folder .. "/UiSettings.json", HttpService:JSONEncode(InterfaceManager.Settings))
     end
 
     function InterfaceManager:LoadSettings()
+		if not self.Folder then error("Folder not set!") end
         local path = self.Folder .. "/UiSettings.json"
         if isfile(path) then
             local data = readfile(path)
@@ -65,6 +67,10 @@ local InterfaceManager = {} do
 		local ToggleUI = nil
 		function ToggleUi(toggle)
 			if toggle then
+				if game.CoreGui:FindFirstChild("HL Toggle") then
+					print("HL Toggle already exist.")
+					return
+				end
 				ToggleUI = Instance.new("ScreenGui")
 				ToggleUI.Name = "HL Toggle"
 				ToggleUI.Parent = game:GetService("CoreGui")
