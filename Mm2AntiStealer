@@ -1,4 +1,6 @@
 --By KirkaTMrus
+repeat task.wait(5) until game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("MainGUI")
+
 function SetConstants()
 	Player = game.Players.LocalPlayer
 	SendRequestF = game.ReplicatedStorage.Trade.SendRequest
