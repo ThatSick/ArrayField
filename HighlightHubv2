@@ -62,7 +62,7 @@ local InterfaceManager = {} do
 				warn("[InterfaceManager] Failed to decode settings file, or file is invalid.")
 			end
 		end
-	end	
+	end
 
     function InterfaceManager:BuildInterfaceSection(tab)
         assert(self.Library, "Must set InterfaceManager.Library")
