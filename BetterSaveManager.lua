@@ -162,25 +162,26 @@ local SaveManager = {} do
 		})
 	end
 
-	function SaveManager:BuildFolderTree()
-		local paths = {
-			self.Folder,
-			self.Folder .. "/settings"
-		}
-
-		for i = 1, #paths do
-			local str = paths[i]
-			if not isfolder(str) then
-				makefolder(str)
-			end
-		end
-
-		if isfile(SaveManager.AutoSavePath) then
-			SaveManager.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
-		else
-			SaveManager.AutoSaveEnabled = false
-		end		
-	end
+    function SaveManager:BuildFolderTree()
+        local paths = {
+            self.Folder,
+            self.Folder .. "/settings"
+        }
+    
+        for i = 1, #paths do
+            local str = paths[i]
+            if not isfolder(str) then
+                makefolder(str)
+            end
+        end
+        
+        if isfile(SaveManager.AutoSavePath) then
+            SaveManager.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
+        else
+            SaveManager.AutoSaveEnabled = true
+            writefile(SaveManager.AutoSavePath, "true")
+        end
+    end    
 
 	function SaveManager:CreateDefaultIfNeeded()
 		local defaultConfigPath = self.Folder .. "/settings/Default.json"
