@@ -4,6 +4,7 @@ local SaveManager = {} do
 	SaveManager.Folder = "HighlightHub"
 	SaveManager.Ignore = {}
 	SaveManager.AutoSaveEnabled = true
+	SaveManager.IsLoadingConfig = true
 	SaveManager.Parser = {
 		Toggle = {
 			Save = function(idx, object) 
@@ -108,7 +109,7 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:AutoSave()
-		if not SaveManager.AutoSaveEnabled then
+		if not SaveManager.AutoSaveEnabled or SaveManager.IsLoadingConfig then
 			return
 		end
 	
@@ -130,28 +131,29 @@ local SaveManager = {} do
 			return false, "no config file is selected"
 		end
 	
+		SaveManager.IsLoadingConfig = true
+	
 		local file = self.Folder .. "/settings/" .. name .. ".json"
-		if not isfile(file) then return false, "invalid file" end
+		if not isfile(file) then 
+			SaveManager.IsLoadingConfig = false
+			return false, "invalid file"
+		end
 	
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
-		if not success then
+		if not success then 
+			SaveManager.IsLoadingConfig = false
 			return false, "decode error"
 		end
 	
-		if typeof(decoded) ~= "table" or typeof(decoded.objects) ~= "table" then
-			return false, "invalid config format"
-		end
-	
 		for _, option in next, decoded.objects do
-			if typeof(option) == "table" and option.type and option.idx and self.Parser[option.type] then
-				task.spawn(function()
-					pcall(function()
-						self.Parser[option.type].Load(option.idx, option)
-					end)
+			if self.Parser[option.type] then
+				task.spawn(function() 
+					self.Parser[option.type].Load(option.idx, option) 
 				end)
 			end
 		end
 	
+		SaveManager.IsLoadingConfig = false
 		return true
 	end	
 
@@ -245,8 +247,6 @@ local SaveManager = {} do
 	function SaveManager:BuildConfigSection(tab)
 		assert(self.Library, "Must set SaveManager.Library")
 
-		local section = tab:AddSection("Configuration")
-
 		local lastSelectedConfig = "Default"
 		local lastSelectedPath = self.Folder .. "/settings/LastSelectedConfig.txt"
 		
@@ -271,7 +271,7 @@ local SaveManager = {} do
 		
 		section:AddButton({Title = "Refresh Config List", Callback = function()
 			SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-			SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
+			--SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
 		end})
 		
 		-- [2] Config Creation
