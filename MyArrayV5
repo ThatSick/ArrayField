@@ -345,10 +345,9 @@ local SaveManager = {} do
 		section:AddToggle("SaveManager_AutoSaveToggle", {
 			Title = "Auto Save Config",
 			Description = "Automatically saves the current config when you change an option.",
-			Default = Settings.AutoSave,
+			Default = SaveManager.AutoSaveEnabled,
 			Callback = function(Value)
 				SaveManager.AutoSaveEnabled = Value
-				Settings.AutoSave = Value
 				InterfaceManager:SaveSettings()
 				if Value then
 					SaveManager:AutoSave()
