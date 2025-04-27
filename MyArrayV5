@@ -2,7 +2,7 @@ local httpService = game:GetService("HttpService")
 
 local SaveManager = {} do
 	SaveManager.Folder = "HighlightHub"
-	SaveManager.AutoSavePath = SaveManager.Folder .. "/settings/AutoSaveEnabled.txt"
+	SaveManager.AutoSavePath = SaveManager.Folder .. "/AutoSaveEnabled.txt"
 	SaveManager.Ignore = {}
 	SaveManager.AutoSaveEnabled = true
 	SaveManager.Parser = {
@@ -213,7 +213,7 @@ local SaveManager = {} do
 
 				if char == "/" or char == "\\" then
 					local name = file:sub(pos + 1, start - 1)
-					if name ~= "ExternalSettings" then
+					if name ~= "UiSettings" then
 						table.insert(out, name)
 					end
 				end
