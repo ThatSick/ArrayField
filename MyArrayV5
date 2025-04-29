@@ -83,7 +83,7 @@ local SaveManager = {} do
 
 	function SaveManager:Save(name)
 		if (not name) then
-			return false, "no config file is selected"
+			return false, "No config file is selected"
 		end
 
 		local fullPath = self.Folder .. "/settings/" .. name .. ".json"
@@ -122,11 +122,11 @@ local SaveManager = {} do
 				end
 			end
 		end
-	end	
+	end
 
 	function SaveManager:Load(name)
 		if not name then
-			return false, "no config file is selected"
+			return false, "No config file is selected"
 		end
 
 		local previousAutoSave = SaveManager.AutoSaveEnabled
@@ -146,11 +146,11 @@ local SaveManager = {} do
 	
 		for _, option in next, decoded.objects do
 			if self.Parser[option.type] then
-				task.spawn(function() 
-					self.Parser[option.type].Load(option.idx, option) 
-				end)
+				task.spawn(self.Library.SafeCallback, self.Library, self.Parser[option.type].Load, option.idx, option)
 			end
 		end
+
+		self.Library:SetTheme(self.Library.Theme)
 
 		SaveManager.AutoSaveEnabled = previousAutoSave
 		return true
@@ -162,25 +162,26 @@ local SaveManager = {} do
 		})
 	end
 
-	function SaveManager:BuildFolderTree()
-		local paths = {
-			self.Folder,
-			self.Folder .. "/settings"
-		}
-
-		for i = 1, #paths do
-			local str = paths[i]
-			if not isfolder(str) then
-				makefolder(str)
-			end
-		end
-
-		if isfile(SaveManager.AutoSavePath) then
-			SaveManager.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
-		else
-			SaveManager.AutoSaveEnabled = false
-		end		
-	end
+    function SaveManager:BuildFolderTree()
+        local paths = {
+            self.Folder,
+            self.Folder .. "/settings"
+        }
+    
+        for i = 1, #paths do
+            local str = paths[i]
+            if not isfolder(str) then
+                makefolder(str)
+            end
+        end
+        
+        if isfile(SaveManager.AutoSavePath) then
+            SaveManager.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
+        else
+            SaveManager.AutoSaveEnabled = true
+            writefile(SaveManager.AutoSavePath, "true")
+        end
+    end    
 
 	function SaveManager:CreateDefaultIfNeeded()
 		local defaultConfigPath = self.Folder .. "/settings/Default.json"
