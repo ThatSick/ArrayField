@@ -1,62 +1,14 @@
 local httpService = game:GetService("HttpService")
 
-type Dropdown = {Value: any, Values: {i: any}, Multi: boolean, Displayer: (v) -> (n)?, SetValue: (any) -> ()}
-
-local DisplayerParser = {
-	Encode = function(Value)
-		local Encoded = {}
-
-		for Val: any, Bool: boolean in Value do
-			table.insert(Encoded, Val)
-		end
-
-		return Encoded
-	end,
-}
-
-local function TableEqual(Table, Reflect)
-	for Index, Value in Table do 
-		if Reflect[Index] ~= Value then return false end 
-	end 
-
-	return true
-end  
-
-local function SetDisplayerDropdownValue(Dropdown: Dropdown, Value)
-	if Dropdown.Multi then
-		local Values = {}
-		
-		for _, DataValue in Value do 
-			for _, DropdownValue in Dropdown.Values do 
-				if typeof(DropdownValue) ~= 'table' or not TableEqual(DataValue, DropdownValue) then continue end 
-				
-				Values[DropdownValue] = true
-				break
-			end
-		end
-		
-		Dropdown:SetValue(Values)
-	else
-		for _, DropdownValue in Dropdown.Values do 
-			if typeof(DropdownValue) ~= 'table' or not TableEqual(Value, DropdownValue) then continue end 
-			
-			Dropdown:SetValue(DropdownValue)
-			break
-		end	
-	end
-end
-
 local SaveManager = {} do
 	SaveManager.Folder = "HighlightHub"
 	SaveManager.AutoSavePath = SaveManager.Folder .. "/AutoSaveEnabled.txt"
-	SaveManager.AutoSaveEnabled = true
-	SaveManager.CanAutoSave = false
 	SaveManager.Ignore = {}
-	SaveManager.Options, SaveManager.Library = {} :: { [string]: {Type: string, Value: any, SetValues: (self: any, NewValue: { [any]: any }) -> nil, SetValue: (self: any, NewValue: any, ...any) -> nil, SetValueRGB: (self: any, NewValue: Color3, Transparency: number?) -> nil} }, {}
+	SaveManager.AutoSaveEnabled = true
 	SaveManager.Parser = {
 		Toggle = {
 			Save = function(idx, object) 
-				return { type = "Toggle", idx = idx, value = object.Value, Timestamp = object.Instance.CreatedAt } 
+				return { type = "Toggle", idx = idx, value = object.Value } 
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -66,7 +18,7 @@ local SaveManager = {} do
 		},
 		Slider = {
 			Save = function(idx, object)
-				return { type = "Slider", idx = idx, value = object.Value, Timestamp = object.Instance.CreatedAt }
+				return { type = "Slider", idx = idx, value = tostring(object.Value) }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -76,28 +28,17 @@ local SaveManager = {} do
 		},
 		Dropdown = {
 			Save = function(idx, object)
-				local HasDisplayer = object.CustomDisplayer
-				
-				return { type = "Dropdown", idx = idx, value = (HasDisplayer and object.Multi and DisplayerParser.Encode(object.Value) or object.Value), mutli = object.Multi, Timestamp = object.Instance.CreatedAt, displayer = HasDisplayer}
+				return { type = "Dropdown", idx = idx, value = object.Value, mutli = object.Multi }
 			end,
 			Load = function(idx, data)
-				if data.value == nil then return end
-				
-				local DropdownElement = SaveManager.Options[idx]
-				if not DropdownElement then return end
-				
-				local Value = data.value 
-				if typeof(Value) ~= 'table' or (not data.displayer) then
-					DropdownElement:SetValue(Value)
-					return
+				if SaveManager.Options[idx] then 
+					SaveManager.Options[idx]:SetValue(data.value)
 				end
-				
-				SetDisplayerDropdownValue(DropdownElement, Value)
 			end,
 		},
 		Colorpicker = {
 			Save = function(idx, object)
-				return { type = "Colorpicker", idx = idx, value = object.Value:ToHex(), transparency = object.Transparency, Timestamp = object.Instance.CreatedAt }
+				return { type = "Colorpicker", idx = idx, value = object.Value:ToHex(), transparency = object.Transparency }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -107,7 +48,7 @@ local SaveManager = {} do
 		},
 		Keybind = {
 			Save = function(idx, object)
-				return { type = "Keybind", idx = idx, mode = object.Mode, key = object.Value, Timestamp = object.Instance.CreatedAt }
+				return { type = "Keybind", idx = idx, mode = object.Mode, key = object.Value }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] then 
@@ -118,7 +59,7 @@ local SaveManager = {} do
 
 		Input = {
 			Save = function(idx, object)
-				return { type = "Input", idx = idx, text = object.Value, Timestamp = object.Instance.CreatedAt }
+				return { type = "Input", idx = idx, text = object.Value }
 			end,
 			Load = function(idx, data)
 				if SaveManager.Options[idx] and type(data.text) == "string" then
@@ -142,10 +83,10 @@ local SaveManager = {} do
 
 	function SaveManager:Save(name)
 		if (not name) then
-			return false, "No config file is selected"
+			return false, "no config file is selected"
 		end
 
-		local fullPath = `{self.Folder}/settings/{name}.json`
+		local fullPath = self.Folder .. "/settings/" .. name .. ".json"
 
 		local data = {
 			objects = {}
@@ -155,16 +96,12 @@ local SaveManager = {} do
 			if not self.Parser[option.Type] then continue end
 			if self.Ignore[idx] then continue end
 
-			data.objects[#data.objects + 1] = self.Parser[option.Type].Save(idx, option)
-		end
-
-		table.sort(data.objects, function(v1: { Timestamp: number }, v2: { Timestamp: number })
-			return v1.Timestamp < v2.Timestamp
-		end)
+			table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
+		end	
 
 		local success, encoded = pcall(httpService.JSONEncode, httpService, data)
 		if not success then
-			return false, "Failed to JSON-Encode data"
+			return false, "failed to encode data"
 		end
 
 		writefile(fullPath, encoded)
@@ -172,53 +109,50 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:AutoSave()
-		if not self.AutoSaveEnabled or not self.CanAutoSave then
+		if not SaveManager.AutoSaveEnabled then
 			return
 		end
 	
-		local configDropdown = self.Options and self.Options.SaveManager_ConfigList
-		if not configDropdown then
-			return
-		end
-	
-		local name = configDropdown.Value
-		if name and name ~= "" then
-			local success, err = self:Save(name)
-			if not success then
-				warn("Auto-save failed: " .. tostring(err))
+		if SaveManager.Options and SaveManager.Options.SaveManager_ConfigList then
+			local name = SaveManager.Options.SaveManager_ConfigList.Value
+			if name and name ~= "" then
+				local success, err = self:Save(name)
+				if not success then
+					warn("Auto-save failed: " .. tostring(err))
+				end
 			end
 		end
 	end	
 
 	function SaveManager:Load(name)
 		if not name then
-			return false, "No config file is selected"
+			return false, "no config file is selected"
 		end
 
-		local previousAutoSave = self.AutoSaveEnabled
-		self.AutoSaveEnabled = false
+		local previousAutoSave = SaveManager.AutoSaveEnabled
+		SaveManager.AutoSaveEnabled = false
 	
-		local file = `{self.Folder}/settings/{name}.json`
+		local file = self.Folder .. "/settings/" .. name .. ".json"
 		if not isfile(file) then 
-			self.AutoSaveEnabled = previousAutoSave
+			SaveManager.AutoSaveEnabled = previousAutoSave
 			return false, "invalid file"
 		end
 	
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
 		if not success then
-			self.AutoSaveEnabled = previousAutoSave
+			SaveManager.AutoSaveEnabled = previousAutoSave
 			return false, "decode error"
 		end
 	
 		for _, option in next, decoded.objects do
 			if self.Parser[option.type] then
-				task.spawn(self.Library.SafeCallback, self.Library, self.Parser[option.type].Load, option.idx, option)
+				task.spawn(function() 
+					self.Parser[option.type].Load(option.idx, option) 
+				end)
 			end
 		end
 
-		self.Library:SetTheme(self.Library.Theme)
-
-		self.AutoSaveEnabled = previousAutoSave
+		SaveManager.AutoSaveEnabled = previousAutoSave
 		return true
 	end	
 
@@ -229,7 +163,10 @@ local SaveManager = {} do
 	end
 
     function SaveManager:BuildFolderTree()
-		local paths = { self.Folder, `{self.Folder}/settings` }
+        local paths = {
+            self.Folder,
+            self.Folder .. "/settings"
+        }
     
         for i = 1, #paths do
             local str = paths[i]
@@ -239,16 +176,16 @@ local SaveManager = {} do
         end
         
         if isfile(SaveManager.AutoSavePath) then
-            self.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
+            SaveManager.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
         else
-            self.AutoSaveEnabled = true
+            SaveManager.AutoSaveEnabled = true
             writefile(SaveManager.AutoSavePath, "true")
         end
     end    
 
 	function SaveManager:CreateDefaultIfNeeded()
-		local defaultConfigPath = `{self.Folder}/settings/Default.json`
-		local autoloadPath = `{self.Folder}/settings/autoload.txt`
+		local defaultConfigPath = self.Folder .. "/settings/Default.json"
+		local autoloadPath = self.Folder .. "/settings/autoload.txt"
 	
 		if not isfile(defaultConfigPath) then
 			self:Save("Default")
@@ -260,7 +197,7 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:RefreshConfigList()
-		local list = listfiles(`{self.Folder}/settings`)
+		local list = listfiles(self.Folder .. "/settings")
 
 		local out = {}
 		for i = 1, #list do
@@ -269,23 +206,21 @@ local SaveManager = {} do
 				local pos = file:find(".json", 1, true)
 				local start = pos
 
-				if typeof(pos) == "number" and typeof(start) == "number" then
-					local char = file:sub(pos, pos)
-					while char ~= "/" and char ~= "\\" and char ~= "" do
-						pos = pos - 1
-						char = file:sub(pos, pos)
-					end
+				local char = file:sub(pos, pos)
+				while char ~= "/" and char ~= "\\" and char ~= "" do
+					pos = pos - 1
+					char = file:sub(pos, pos)
+				end
 
-					if char == "/" or char == "\\" then
-						local name = file:sub(pos + 1, start - 1)
-						if name ~= "options" then
-							out[#out + 1] = name
-						end
+				if char == "/" or char == "\\" then
+					local name = file:sub(pos + 1, start - 1)
+					if name ~= "UiSettings" then
+						table.insert(out, name)
 					end
 				end
 			end
 		end
-
+		
 		return out
 	end
 
@@ -295,30 +230,24 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:LoadAutoloadConfig()
-		if isfile(`{self.Folder}/settings/autoload.txt`) then
-			local name = readfile(`{self.Folder}/settings/autoload.txt`)
+		if isfile(self.Folder .. "/settings/autoload.txt") then
+			local name = readfile(self.Folder .. "/settings/autoload.txt")
 
 			local success, err = self:Load(name)
 			if not success then
 				return self.Library:Notify({
-					Title = "Interface",
-					Content = "Config loader",
-					SubContent = `Failed to load autoload config: {err}`,
-					Duration = 7
+					Title = "Configuration",
+					Content = "Failed to load autoload config: " .. err,
+					Duration = 5
 				})
-			else
-				self.CanAutoSave = true
 			end
 
-			return self.Library:Notify({
-				Title = "Interface",
-				Content = "Config loader",
-				SubContent = string.format("Auto loaded config %q", name),
-				Duration = 7
+			self.Library:Notify({
+				Title = "Configuration",
+				Content = string.format("Auto loaded config %q", name),
+				Duration = 5
 			})
 		end
-
-		return nil
 	end
 
 	function SaveManager:BuildConfigSection(tab)
@@ -384,24 +313,20 @@ local SaveManager = {} do
 		})
 		
 		-- [3] Config Loading / Saving
-		section:AddButton({Title = "Load config", Callback = function()
+		section:AddButton({Title = "Load Selected Config", Callback = function()
 			local name = SaveManager.Options.SaveManager_ConfigList.Value
-
 			local success, err = self:Load(name)
 			if not success then
 				return self.Library:Notify({
-					Title = "Interface",
-					Content = "Config loader",
-					SubContent = "Failed to load config: " .. err,
-					Duration = 7
+					Title = "Configuration",
+					Content = "Failed to load config: " .. err,
+					Duration = 5
 				})
 			end
-
-			return self.Library:Notify({
-				Title = "Interface",
-				Content = "Config loader",
-				SubContent = string.format("Loaded config %q", name),
-				Duration = 7
+			self.Library:Notify({
+				Title = "Configuration",
+				Content = string.format("Loaded config %q", name),
+				Duration = 5
 			})
 		end})
 		
@@ -426,9 +351,9 @@ local SaveManager = {} do
 		section:AddToggle("SaveManager_AutoSaveToggle", {
 			Title = "Auto Save Config",
 			Description = "Automatically saves the current config when you change an option.",
-			Default = self.AutoSaveEnabled,
+			Default = SaveManager.AutoSaveEnabled,
 			Callback = function(Value)
-				self.AutoSaveEnabled = Value
+				SaveManager.AutoSaveEnabled = Value
 				if Value then
 					writefile(SaveManager.AutoSavePath, "true")
 					SaveManager:AutoSave()
@@ -443,7 +368,7 @@ local SaveManager = {} do
 		AutoloadButton = section:AddButton({Title = "Set as Autoload Config", Description = "Current autoload config: none", Callback = function()
 			local name = SaveManager.Options.SaveManager_ConfigList.Value
 			if name then
-				writefile(`{self.Folder}/settings/autoload.txt`, name)
+				writefile(self.Folder .. "/settings/autoload.txt", name)
 				AutoloadButton:SetDesc("Current autoload config: " .. name)
 				self.Library:Notify({
 					Title = "Configuration",
@@ -451,7 +376,7 @@ local SaveManager = {} do
 					Duration = 5
 				})
 			else
-				delfile(`{self.Folder}/settings/autoload.txt`, name)
+				delfile(self.Folder .. "/settings/autoload.txt")
 				AutoloadButton:SetDesc("Current autoload config: none")
 				self.Library:Notify({
 					Title = "Configuration",
@@ -461,8 +386,8 @@ local SaveManager = {} do
 			end
 		end})
 		
-		if isfile(`{self.Folder}/settings/autoload.txt`, name) then
-			local name = readfile(`{self.Folder}/settings/autoload.txt`, name)
+		if isfile(self.Folder .. "/settings/autoload.txt") then
+			local name = readfile(self.Folder .. "/settings/autoload.txt")
 			AutoloadButton:SetDesc("Current autoload config: " .. name)
 		end
 		
@@ -480,9 +405,9 @@ local SaveManager = {} do
 				Duration = 5
 			})
 			
-			if isfile(`{self.Folder}/settings/autoload.txt`, name) then
-				if readfile(`{self.Folder}/settings/autoload.txt`, name) == name then
-					delfile(`{self.Folder}/settings/autoload.txt`, name)
+			if isfile(self.Folder .. "/settings/autoload.txt") then
+				if readfile(self.Folder .. "/settings/autoload.txt") == name then
+					delfile(self.Folder .. "/settings/autoload.txt")
 					AutoloadButton:SetDesc("Current autoload config: none")
 					self.Library:Notify({
 						Title = "Configuration",
@@ -493,12 +418,12 @@ local SaveManager = {} do
 			end
 		end})		
 
-		if isfile(`{self.Folder}/settings/autoload.txt`, name) then
-			local name = readfile(`{self.Folder}/settings/autoload.txt`, name)
+		if isfile(self.Folder .. "/settings/autoload.txt") then
+			local name = readfile(self.Folder .. "/settings/autoload.txt")
 			AutoloadButton:SetDesc("Current autoload config: " .. name)
 		end
 
-		SaveManager:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
+		SaveManager:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_CreateConfigInput" })
 	end
 
 	SaveManager:BuildFolderTree()
