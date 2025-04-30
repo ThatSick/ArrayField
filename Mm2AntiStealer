@@ -155,6 +155,9 @@ end
 
 currentAllowWindow = nil
 function CreateAllowWindow(targ)
+    if not hookmetamethod then
+        return
+    end
 	local e1 = Instance.new("ScreenGui")
 	e1.ResetOnSpawn = false
 	e1.Name = RandomName()
@@ -179,7 +182,7 @@ function CreateAllowWindow(targ)
 	e3.Size = UDim2.new(1, 0, 0.25, 0)
 	e3.TextScaled = true
 	e3.TextColor3 = Color3.new(1, 1, 1)
-	e3.Text = "Trade started"
+	e3.Text = "Trade Started"
 	e3.Parent = e2
 	local e4 = Instance.new("TextLabel")
 	e4.Name = RandomName()
@@ -189,7 +192,7 @@ function CreateAllowWindow(targ)
 	e4.Size = UDim2.new(1, 0, 0.5, 0)
 	e4.TextScaled = true
 	e4.TextColor3 = Color3.new(1, 1, 1)
-	e4.Text = 'Trade started with '..targ..', if you allow this trade click "yes", if no - click "no" for block your client'
+	e4.Text = 'Trade started with '..targ..', do you allow this trade?'
 	e4.Parent = e2
 	local e5 = Instance.new("TextButton")
 	e5.Name = RandomName()
