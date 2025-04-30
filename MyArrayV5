@@ -50,6 +50,7 @@ local SaveManager = {} do
 	SaveManager.Folder = "HighlightHub"
 	SaveManager.AutoSavePath = SaveManager.Folder .. "/AutoSaveEnabled.txt"
 	SaveManager.AutoSaveEnabled = true
+	SaveManager.CanAutoSave = false
 	SaveManager.Ignore = {}
 	SaveManager.Options, SaveManager.Library = {} :: { [string]: {Type: string, Value: any, SetValues: (self: any, NewValue: { [any]: any }) -> nil, SetValue: (self: any, NewValue: any, ...any) -> nil, SetValueRGB: (self: any, NewValue: Color3, Transparency: number?) -> nil} }, {}
 	SaveManager.Parser = {
@@ -171,11 +172,11 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:AutoSave()
-		if not self.AutoSaveEnabled then
+		if not self.AutoSaveEnabled or not self.CanAutoSave then
 			return
 		end
 	
-		local configDropdown = SaveManager.Options and SaveManager.Options.SaveManager_ConfigList
+		local configDropdown = self.Options and self.Options.SaveManager_ConfigList
 		if not configDropdown then
 			return
 		end
@@ -305,6 +306,8 @@ local SaveManager = {} do
 					SubContent = `Failed to load autoload config: {err}`,
 					Duration = 7
 				})
+			else
+				self.CanAutoSave = true
 			end
 
 			return self.Library:Notify({
@@ -501,5 +504,5 @@ local SaveManager = {} do
 	SaveManager:BuildFolderTree()
 end
 
-print("BetterSaveManager 2 Loaded")
+print("BetterSaveManager Loaded")
 return SaveManager
