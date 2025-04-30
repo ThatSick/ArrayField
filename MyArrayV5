@@ -504,5 +504,5 @@ local SaveManager = {} do
 	SaveManager:BuildFolderTree()
 end
 
-print("BetterSaveManager Loaded")
+print("BetterSaveManager 2 Loaded")
 return SaveManager
