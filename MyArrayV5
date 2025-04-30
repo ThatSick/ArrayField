@@ -171,38 +171,41 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:AutoSave()
-		if not SaveManager.AutoSaveEnabled then
+		if not self.AutoSaveEnabled then
 			return
 		end
 	
-		if SaveManager.Options and SaveManager.Options.SaveManager_ConfigList then
-			local name = SaveManager.Options.SaveManager_ConfigList.Value
-			if name and name ~= "" then
-				local success, err = self:Save(name)
-				if not success then
-					warn("Auto-save failed: " .. tostring(err))
-				end
+		local configDropdown = SaveManager.Options and SaveManager.Options.SaveManager_ConfigList
+		if not configDropdown then
+			return
+		end
+	
+		local name = configDropdown.Value
+		if name and name ~= "" then
+			local success, err = self:Save(name)
+			if not success then
+				warn("Auto-save failed: " .. tostring(err))
 			end
 		end
-	end
+	end	
 
 	function SaveManager:Load(name)
 		if not name then
 			return false, "No config file is selected"
 		end
 
-		local previousAutoSave = SaveManager.AutoSaveEnabled
-		SaveManager.AutoSaveEnabled = false
+		local previousAutoSave = self.AutoSaveEnabled
+		self.AutoSaveEnabled = false
 	
 		local file = `{self.Folder}/settings/{name}.json`
 		if not isfile(file) then 
-			SaveManager.AutoSaveEnabled = previousAutoSave
+			self.AutoSaveEnabled = previousAutoSave
 			return false, "invalid file"
 		end
 	
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
 		if not success then
-			SaveManager.AutoSaveEnabled = previousAutoSave
+			self.AutoSaveEnabled = previousAutoSave
 			return false, "decode error"
 		end
 	
@@ -214,7 +217,7 @@ local SaveManager = {} do
 
 		self.Library:SetTheme(self.Library.Theme)
 
-		SaveManager.AutoSaveEnabled = previousAutoSave
+		self.AutoSaveEnabled = previousAutoSave
 		return true
 	end	
 
@@ -235,9 +238,9 @@ local SaveManager = {} do
         end
         
         if isfile(SaveManager.AutoSavePath) then
-            SaveManager.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
+            self.AutoSaveEnabled = readfile(SaveManager.AutoSavePath) == "true"
         else
-            SaveManager.AutoSaveEnabled = true
+            self.AutoSaveEnabled = true
             writefile(SaveManager.AutoSavePath, "true")
         end
     end    
@@ -420,9 +423,9 @@ local SaveManager = {} do
 		section:AddToggle("SaveManager_AutoSaveToggle", {
 			Title = "Auto Save Config",
 			Description = "Automatically saves the current config when you change an option.",
-			Default = SaveManager.AutoSaveEnabled,
+			Default = self.AutoSaveEnabled,
 			Callback = function(Value)
-				SaveManager.AutoSaveEnabled = Value
+				self.AutoSaveEnabled = Value
 				if Value then
 					writefile(SaveManager.AutoSavePath, "true")
 					SaveManager:AutoSave()
@@ -498,5 +501,5 @@ local SaveManager = {} do
 	SaveManager:BuildFolderTree()
 end
 
-print("BetterSaveManager Loaded")
+print("BetterSaveManager 2 Loaded")
 return SaveManager
