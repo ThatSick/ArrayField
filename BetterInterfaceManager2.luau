@@ -1,35 +1,44 @@
-local HttpService = game:GetService("HttpService")
+local httpService = game:GetService("HttpService")
 
 local InterfaceManager = {} do
 	InterfaceManager.Folder = "HighlightHub"
+
     InterfaceManager.Settings = {
         Theme = "Amethyst Dark",
         Acrylic = false,
         Transparency = true,
 		ToggleUiButton = true,
 		AutoMinimize = false,
-        MenuKeybind = "LeftControl"
+        MenuKeybind = Enum.KeyCode.LeftControl
     }
 
-    function InterfaceManager:SetFolder(folder)
+	function InterfaceManager:SetFolder(folder)
 		self.Folder = folder;
 		self:BuildFolderTree()
 	end
 
     function InterfaceManager:SetLibrary(library)
 		self.Library = library
+
+		InterfaceManager.Settings = {
+			Theme = self.Library.Theme or "Dark",
+			Acrylic = self.Library.UseAcrylic or true,
+			Transparency = self.Library.Transparency or true,
+			MenuKeybind = self.Library.MinimizeKey or Enum.KeyCode.RightControl
+		}
 	end
 
     function InterfaceManager:BuildFolderTree()
 		local paths = {}
 
 		local parts = self.Folder:split("/")
+
 		for idx = 1, #parts do
 			paths[#paths + 1] = table.concat(parts, "/", 1, idx)
 		end
-
-		table.insert(paths, self.Folder)
-		--table.insert(paths, self.Folder .. "/settings")
+		
+		paths[#paths + 1] = self.Folder
+		paths[#paths + 1] = `{self.Folder}/settings`
 
 		for i = 1, #paths do
 			local str = paths[i]
@@ -40,28 +49,23 @@ local InterfaceManager = {} do
 	end
 
     function InterfaceManager:SaveSettings()
-		if not self.Folder then error("Folder not set.") end
-        writefile(self.Folder .. "/UiSettings.json", HttpService:JSONEncode(InterfaceManager.Settings))
+        writefile(`{self.Folder}/options.json`, httpService:JSONEncode(InterfaceManager.Settings))
     end
 
-	function InterfaceManager:LoadSettings()
-		if not self.Folder then error("Folder not set!") end
-		local path = self.Folder .. "/UiSettings.json"
-		if isfile(path) then
-			local data = readfile(path)
-			local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
-	
-			if success and type(decoded) == "table" then
-				for i, v in next, decoded do
-					if i ~= nil and v ~= nil then
-						InterfaceManager.Settings[i] = v
-					end
-				end
-			else
-				warn("[InterfaceManager] Failed to decode settings file, or file is invalid.")
-			end
-		end
-	end
+    function InterfaceManager:LoadSettings()
+        local path = `{self.Folder}/options.json`
+
+        if isfile(path) then
+            local data = readfile(path)
+            local success, decoded = pcall(httpService.JSONDecode, httpService, data)
+
+            if success then
+                for i, v in next, decoded do
+                    InterfaceManager.Settings[i] = v
+                end
+            end
+        end
+    end
 
     function InterfaceManager:BuildInterfaceSection(tab)
         assert(self.Library, "Must set InterfaceManager.Library")
@@ -174,7 +178,7 @@ local InterfaceManager = {} do
 		if Library.UseAcrylic then
 			section:AddToggle("AcrylicToggle", {
 				Title = "Acrylic",
-				Description = "Blurred background (requires graphic quality 8+)",
+				Description = "The blurred background requires graphic quality 8+",
 				Default = Settings.Acrylic,
 				Callback = function(Value)
 					Library:ToggleAcrylic(Value)
@@ -197,7 +201,7 @@ local InterfaceManager = {} do
 		
 		-- [3] UI Behavior
 		section:AddToggle("ToggleUiButtonToggle", {
-			Title = "Show UI Toggle Button",
+			Title = "UI Toggle Button",
 			Description = "Adds a small draggable button to minimize the UI.",
 			Default = Settings.ToggleUiButton,
 			Callback = function(Value)
@@ -220,25 +224,33 @@ local InterfaceManager = {} do
 		if Settings.AutoMinimize then
 			Library.Window:Minimize()
 		end
+
+		local MenuKeybind = section:AddKeybind("InterfaceManager_MenuKeybind", {
+			Title = "Minimize Keybind", 
+			Default = Settings.MenuKeybind,
+			ChangedCallback = function(Value)
+				Settings.MenuKeybind = Value
+                InterfaceManager:SaveSettings()
+			end
+		})
 		
 		-- [4] Keybinds
 		local MenuKeybind = section:AddKeybind("MenuKeybind", {
 			Title = "Minimize Keybind",
-			Default = Settings.MenuKeybind
-		})
-		
-		MenuKeybind:OnChanged(function()
-			if not MenuKeybind.Value or MenuKeybind.Value == "Unknown" then
-				return
+			Default = Settings.MenuKeybind,
+			ChangedCallback = function(Value)
+				if not Value or Value == "Unknown" then
+					return
+				end
+				Settings.MenuKeybind = Value
+                InterfaceManager:SaveSettings()
 			end
-			Settings.MenuKeybind = MenuKeybind.Value
-			InterfaceManager:SaveSettings()
-		end)
+		})
 		
 		Library.MinimizeKeybind = MenuKeybind
 		
 		-- [5] Miscellaneous
-		section:AddButton({
+		--[[section:AddButton({
 			Title = "Clear Script Selection",
 			Description = "Clears your previously saved script choice.",
 			Callback = function()
@@ -250,7 +262,7 @@ local InterfaceManager = {} do
 					Fluent:Notify({ Title = "Highlight Hub", Content = "No selection found.", Duration = 3 })
 				end
 			end
-		})		
+		})]]
     end
 end
 
